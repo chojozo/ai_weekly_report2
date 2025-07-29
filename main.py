@@ -19,7 +19,7 @@ NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
-EMAIL_RECIPIENT = os.getenv("EMAIL_RECIPIENT")
+EMAIL_RECIPIENT = os.getenv("EMAIL_RECIPIENT") # This will now contain comma-separated emails
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -140,16 +140,16 @@ def create_notion_page(title, content):
         print(f"Notion 페이지 생성 오류: {e}")
         return None
 
-def send_email(subject: str, body: str, to_email: str):
+def send_email(subject: str, body: str, to_emails: list[str]): # Changed to_email to to_emails (list)
     try:
-        msg = MIMEText(body, 'html') # Set subtype to 'html'
+        msg = MIMEText(body, 'html')
         msg['Subject'] = subject
         msg['From'] = EMAIL_SENDER
-        msg['To'] = to_email
+        msg['To'] = ", ".join(to_emails) # Join the list of emails with comma and space
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
             smtp.send_message(msg)
-        print(f"이메일이 {to_email} (으)로 성공적으로 발송되었습니다.")
+        print(f"이메일이 {', '.join(to_emails)} (으)로 성공적으로 발송되었습니다.") # Update print message
     except Exception as e:
         print(f"이메일 발송 중 오류 발생: {e}")
 
@@ -189,10 +189,12 @@ if __name__ == "__main__":
     {html_report_content}
 </body>
 </html>"""
+                # Split the comma-separated recipient string into a list
+                recipient_list = [email.strip() for email in EMAIL_RECIPIENT.split(',')]
                 send_email(
                     subject=f"[주간 AI 트렌드] {page_title}",
                     body=email_body,
-                    to_email=EMAIL_RECIPIENT
+                    to_emails=recipient_list # Pass the list
                 )
             else:
                 print("Notion 페이지 생성에 실패했습니다.")
