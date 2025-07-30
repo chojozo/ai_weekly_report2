@@ -178,6 +178,7 @@ if __name__ == "__main__":
         report_content = generate_ai_trend_report_with_gpt(articles)
         
         if report_content:
+            report_content += "\n\n---\n\n이 보고서는 국내외 AI관련 언론사의 일주일간의 모든 기사를 토대로 ChatGPT가 작성한 보고서입니다.\n(국내: AI TIMES, Mirakle AI, Robot News 해외: MIT, The Verge, VentureBeat)"
             print("보고서 생성 완료. Notion 페이지를 생성합니다...")
             page_title = f"주간 AI 트렌드 분석 보고서 ({datetime.now().strftime('%Y-%m-%d')})"
             notion_url = create_notion_page(page_title, report_content)
