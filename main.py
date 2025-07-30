@@ -34,19 +34,33 @@ def get_recent_articles():
 def generate_ai_trend_report_with_gpt(articles):
     article_list_str = "\n".join([f"- [{article['title']}]({article['link']})" for article in articles])
     
-    prompt = f"""다음은 지난 한 주간의 AI 관련 뉴스 기사 제목과 링크 목록입니다.
-이 기사들을 분석하여 '주간 AI 트렌드 분석 보고서'를 작성해주세요.
+    prompt = f"""
+당신의 역할:
+당신은 인공지능(AI) 산업 전반의 기술, 비즈니스, 정책 흐름을 분석하는 전문 애널리스트입니다.
+다음에 제시되는 AI 관련 뉴스 제목과 링크 목록을 기반으로, 지난 한 주간의 주요 AI 트렌드 분석 보고서를 작성해 주세요.
+영어기사와 한국어기사를 모두 포함하여, 종합적으로 분석해 주세요.
 
-보고서 작성 조건:
-- 역할: 당신은 AI 트렌드를 전문적으로 분석하고 보고서를 작성하는 전문가입니다.
-- 말투: 전문적이고 읽기 쉬운 블로그 스타일.
-- 구성:
-  1. 서론: 보고서의 목적과 개요를 설명합니다.
-  2. 서론과 주요 트렌드 사이에 마크다운 가로줄(---)을 삽입합니다.
-  3. 주요 트렌드 (3~5개): 각 트렌드별로 소제목(###)을 붙이고, 해당 트렌드를 설명하는 문단과 함께 관련 기사들을 `[관련기사보기](링크)` 형식으로 자연스럽게 인용하거나 나열해주세요.
-  4. 주요 트렌드와 마무리 인사이트 사이에 마크다운 가로줄(---)을 삽입합니다.
-  5. 마무리 인사이트: 전체적인 트렌드를 요약하고 미래 전망에 대한 간략한 인사이트를 제공합니다.
-- 형식: 마크다운 형식으로 작성하며, 소제목은 `###`을 사용하고, 기사 인용 시에는 반드시 `[관련기사보기](링크)` 형식을 지켜주세요.
+작성 조건 및 형식:
+스타일: 전문가다운 어조이되, 읽기 쉬운 블로그 스타일로 작성하세요.
+
+구조는 아래의 형식을 따라 주세요:
+보고서 구조:
+# 주간 AI 트렌드 분석 보고서
+
+이번 보고서의 목적과 개요를 간단히 설명해 주세요. 문장의 첫칸은 띄워주세요.
+
+--- (마크다운 가로줄)
+## 주요 트렌드
+주요 트렌드 분석 (3~5개)
+각 트렌드는 ### 소제목으로 작성해 주세요. 번호를 붙여주세요.
+각 트렌드 아래에는 • 불릿을 붙여 3~5개 핵심 포인트를 설명해 주세요.
+설명 문장 내의 핵심 키워드를 클릭하면 관련 기사로 연결되도록 해주세요.
+
+--- (마크다운 가로줄)
+
+## 마무리 인사이트
+이번 주 AI 업계의 전반적인 흐름을 요약하고,
+향후 주목할 기술/산업/정책 이슈에 대해 간단한 전망을 덧붙여 주세요. 문장의 첫칸은 띄워주세요.
 
 기사 목록:
 {article_list_str}
@@ -175,17 +189,17 @@ if __name__ == "__main__":
                 email_body = f"""<html>
 <head>
     <style>
-        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {{
-            font-family: 'GmarketSans', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            font-family: 'Inter', sans-serif;
         }}
     </style>
 </head>
 <body>
     <p>안녕하세요,</p>
     <p>주간 AI 트렌드 분석 보고서가 생성되었습니다.</p>
-    <p>Notion 링크: <a href=\"{notion_url}\">Notion 링크</a></p>
-    <h2>보고서 내용:</h2>
+    <p><a href=\"{notion_url}\">Notion 링크</a></p>
+    
     {html_report_content}
 </body>
 </html>"""
