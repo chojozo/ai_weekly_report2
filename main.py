@@ -47,7 +47,7 @@ def generate_ai_trend_report_with_gpt(articles):
 보고서 구조:
 # 주간 AI 트렌드 분석 보고서
 
-이번 보고서의 목적과 개요를 간단히 설명해 주세요. 문장의 첫칸은 띄워주세요.
+이번 보고서의 목적과 개요를 간단히 설명해 주세요.
 
 --- (마크다운 가로줄)
 ## 주요 트렌드
@@ -58,9 +58,21 @@ def generate_ai_trend_report_with_gpt(articles):
 
 --- (마크다운 가로줄)
 
+## 주요 기업 동향
+google, Microsoft, OpenAI 등 주요 기업의 최근 동향을 포함해 주세요.
+문장에는 • 불릿을 붙여 작성해 주고, 문장 내의 핵심 키워드를 클릭하면 관련 기사로 연결되도록 해주세요.
+
+--- (마크다운 가로줄)
+
+## 기술 트렌드
+새롭게 발표된 기술이나 제품, 모델, 연구 결과 등에 대해 분석해 주세요.
+문장에는 • 불릿을 붙여 작성해 주고, 문장 내의 핵심 키워드를 클릭하면 관련 기사로 연결되도록 해주세요.
+
+--- (마크다운 가로줄)
+
 ## 마무리 인사이트
 이번 주 AI 업계의 전반적인 흐름을 요약하고,
-향후 주목할 기술/산업/정책 이슈에 대해 간단한 전망을 덧붙여 주세요. 문장의 첫칸은 띄워주세요.
+향후 주목할 기술/산업/정책 이슈에 대해 간단한 전망을 덧붙여 주세요.
 
 기사 목록:
 {article_list_str}
@@ -83,42 +95,76 @@ def generate_ai_trend_report_with_gpt(articles):
         return None
 
 def parse_rich_text(text: str):
-    # Markdown 링크 형식: [텍스트](https://...)
+    # Markdown 링크 및 bold 텍스트를 함께 처리
     link_pattern = r'\[([^\]]+)\]\((https?://[^\)]+)\)'
+    bold_pattern = r'\*\*([^\*]+)\*\*'
     segments = []
     last_end = 0
 
+    # 링크 우선 처리
     for match in re.finditer(link_pattern, text):
         start, end = match.span()
-        
-        # 일반 텍스트 먼저 추가
-        if start > last_end:
-            segments.append({
-                "type": "text",
-                "text": {"content": text[last_end:start]},
-                "annotations": {"bold": False}
-            })
 
-        # 링크 텍스트를 [텍스트] 형태로 표시
-        link_content = match.group(1) # Use match.group(1) directly
+        # 이전 일반 텍스트 (굵게 포함 가능)
+        if start > last_end:
+            interim_text = text[last_end:start]
+            segments.extend(process_text_styles(interim_text))
+
+        # 링크 추가
+        link_text = match.group(1)
         link_url = match.group(2)
         segments.append({
             "type": "text",
-            "text": {"content": link_content, "link": {"url": link_url}},
+            "text": {"content": link_text, "link": {"url": link_url}},
             "annotations": {"bold": False}
         })
 
         last_end = end
 
-    # 남은 일반 텍스트 추가
+    # 남은 텍스트 처리
+    if last_end < len(text):
+        segments.extend(process_text_styles(text[last_end:]))
+
+    return segments
+
+def process_text_styles(text: str):
+    segments = []
+    last_end = 0
+
+    # **굵게** 또는 *기울임* 모두 처리
+    pattern = r'(\*\*.*?\*\*|\*.*?\*)'
+    for match in re.finditer(pattern, text):
+        start, end = match.span()
+        if start > last_end:
+            segments.append({
+                "type": "text",
+                "text": {"content": text[last_end:start]},
+                "annotations": {"bold": False, "italic": False}
+            })
+
+        content = match.group(0)
+        clean_content = content.strip('*')
+        is_bold = content.startswith('**')
+        is_italic = not is_bold  # 간단한 처리
+
+        segments.append({
+            "type": "text",
+            "text": {"content": clean_content},
+            "annotations": {"bold": is_bold, "italic": is_italic}
+        })
+
+        last_end = end
+
     if last_end < len(text):
         segments.append({
             "type": "text",
             "text": {"content": text[last_end:]},
-            "annotations": {"bold": False}
+            "annotations": {"bold": False, "italic": False}
         })
 
     return segments
+
+
 
 def markdown_to_notion_blocks(md_text: str):
     lines = md_text.splitlines()
