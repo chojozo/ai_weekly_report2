@@ -1,11 +1,11 @@
-name: Daily AI Report Generation
+name: Daily AI Trend Report Generation
 
 on:
   schedule:
-    # 매일 오전 9시 (한국 시간)에 실행 (UTC 00:00)
+    # 매일 오전 11시 30분 (한국 시간)에 실행 (UTC 02:30)
     # GitHub Actions 스케줄은 UTC 기준입니다.
-    # 한국 시간 오전 9시는 UTC 자정(00:00)과 같습니다.
-    - cron: '30 23 * * *'  # 한국 시간 08:30 == UTC 23:30 (전날)
+    # 한국 시간 오전 11시 30분은 UTC 2시 30분과 같습니다.
+    - cron: '30 2 * * *'
   workflow_dispatch: # 수동 실행을 위한 트리거
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Run AI Report Generator
+    - name: Run AI Trend Report Generator
       env:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -34,4 +34,4 @@ jobs:
         EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
         EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      run: python main.py
+      run: python daily_trend_report.py
