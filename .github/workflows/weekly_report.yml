@@ -1,4 +1,4 @@
-name: Daily AI Report Generation
+name: weekly AI Report Generation
 
 on:
   schedule:
