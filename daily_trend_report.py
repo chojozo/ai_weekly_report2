@@ -222,7 +222,7 @@ if __name__ == "__main__":
             report_content += (
                 "\n\n---\n\n"
                 "본 보고서는 국내외 주요 AI 전문 언론사의 최근 24시간 기사 내용을 기반으로 **ChatGPT**가 종합·작성한 자료입니다.\n"
-                "*(국내: AI TIMES, Mirakle AI, Robot News / 해외: MIT Technology Review, The Verge, VentureBeat)*"
+                "*(국내: AI TIMES, Mirakle AI, 로봇신문 / 해외: MIT Technology Review, The Verge, VentureBeat, Techcrunch)*"
             )
             print("보고서 생성 완료. Notion 페이지를 생성합니다...")
             page_title = f"일간 AI 주요 트렌드 ({datetime.now().strftime('%Y-%m-%d')})"
