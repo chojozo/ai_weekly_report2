@@ -225,7 +225,7 @@ if __name__ == "__main__":
                 "*(국내: AI TIMES, Mirakle AI, 로봇신문 / 해외: MIT Technology Review, The Verge, VentureBeat, Techcrunch)*"
             )
             print("보고서 생성 완료. Notion 페이지를 생성합니다...")
-            page_title = f"일간 AI 주요 트렌드 ({datetime.now().strftime('%Y-%m-%d')})"
+            page_title = f"일간 AI 주요 트렌드 ({(datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')})"
             notion_url = create_notion_page(page_title, report_content)
             
             if notion_url:
