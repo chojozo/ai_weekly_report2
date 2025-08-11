@@ -72,24 +72,56 @@ google, Microsoft, OpenAI, meta, alphabet 등 주요 기업의 최근 동향을 
 오늘 AI 업계의 전반적인 흐름을 요약하고,
 향후 주목할 기술/산업/정책 이슈에 대해 간단한 전망을 덧붙여 주세요.
 
+**출력 규칙**:
+- 최종 보고서 전체 분량은 공백 포함 2000자 이내로 작성.
+
 기사 목록:
 {article_list_str}
 
 데일리 AI 트렌드 분석 보고서:
 """
+    def _extract_text(resp):
+        # 1) SDK 최신 경로
+        if hasattr(resp, "output_text") and resp.output_text:
+            return resp.output_text
+
+        # 2) 구조 파싱
+        parts = []
+        for item in getattr(resp, "output", []) or []:
+            if getattr(item, "type", None) in ("message", "text", "output_text"):
+                content = getattr(item, "content", None)
+                if isinstance(content, list):
+                    for c in content:
+                        if getattr(c, "type", None) in ("text", "output_text"):
+                            parts.append(str(getattr(c, "text", "")))
+                elif content:
+                    parts.append(str(content))
+        return "\n".join(p for p in parts if p).strip()
+
     try:
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are an expert AI trend analyst and report writer."},
-                {"role": "user", "content": prompt}
+        resp = openai_client.responses.create(
+            model="gpt-5",
+            input=[
+                {"role": "system", "content": "You are an expert AI trend analyst and report writer. Reply with Markdown only, no explanations."},
+                {"role": "user", "content": prompt},
             ],
-            max_tokens=2000, # Adjust as needed
-            temperature=0.7,
+            max_output_tokens=10000,  # 배치 모드니까 넉넉하게
+            reasoning={"effort": "medium"},
         )
-        return response.choices[0].message.content
+
+        text = _extract_text(resp)
+
+        # 만약 여전히 비면 raw 출력 확인
+        if not text:
+            print("DEBUG raw response:", resp)
+            return None
+
+        return text
+
     except Exception as e:
-        print(f"ChatGPT API 호출 오류: {e}")
+        import traceback
+        print("ChatGPT API 호출 오류:", repr(e))
+        traceback.print_exc()
         return None
 
 def parse_rich_text(text: str):
