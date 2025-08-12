@@ -135,29 +135,73 @@ google, Microsoft, OpenAI 등 주요 기업의 최근 동향을 포함해 주세
 
 # --- Notion 변환 유틸 (그대로 사용) ---
 def parse_rich_text(text: str):
+    # Markdown 링크 및 bold 텍스트를 함께 처리
     link_pattern = r'\[([^\]]+)\]\((https?://[^\)]+)\)'
-    segments, last_end = [], 0
+    bold_pattern = r'\*\*([^\*]+)\*\*'
+    segments = []
+    last_end = 0
+
+    # 링크 우선 처리
     for match in re.finditer(link_pattern, text):
         start, end = match.span()
+
+        # 이전 일반 텍스트 (굵게 포함 가능)
         if start > last_end:
-            segments.append({
-                "type": "text",
-                "text": {"content": text[last_end:start]},
-                "annotations": {"bold": False}
-            })
-        link_text, link_url = match.group(1), match.group(2)
+            interim_text = text[last_end:start]
+            segments.extend(process_text_styles(interim_text))
+
+        # 링크 추가
+        link_text = match.group(1)
+        link_url = match.group(2)
         segments.append({
             "type": "text",
             "text": {"content": link_text, "link": {"url": link_url}},
             "annotations": {"bold": False}
         })
+
         last_end = end
+
+    # 남은 텍스트 처리
+    if last_end < len(text):
+        segments.extend(process_text_styles(text[last_end:]))
+
+    return segments
+
+def process_text_styles(text: str):
+    segments = []
+    last_end = 0
+
+    # **굵게** 또는 *기울임* 모두 처리
+    pattern = r'(\*\*.*?\*\*|\*.*?\*)'
+    for match in re.finditer(pattern, text):
+        start, end = match.span()
+        if start > last_end:
+            segments.append({
+                "type": "text",
+                "text": {"content": text[last_end:start]},
+                "annotations": {"bold": False, "italic": False}
+            })
+
+        content = match.group(0)
+        clean_content = content.strip('*')
+        is_bold = content.startswith('**')
+        is_italic = not is_bold  # 간단한 처리
+
+        segments.append({
+            "type": "text",
+            "text": {"content": clean_content},
+            "annotations": {"bold": is_bold, "italic": is_italic}
+        })
+
+        last_end = end
+
     if last_end < len(text):
         segments.append({
             "type": "text",
             "text": {"content": text[last_end:]},
-            "annotations": {"bold": False}
+            "annotations": {"bold": False, "italic": False}
         })
+
     return segments
 
 def markdown_to_notion_blocks(md_text: str):
