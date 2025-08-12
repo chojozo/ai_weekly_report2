@@ -22,7 +22,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 UNSUB_BASE = "https://corocmnneqzimohtrhuf.supabase.co/functions/v1/unsubscribe"  # 프로젝트 도메인으로 교체
-SUB_URL    = "https://corocmnneqzimohtrhuf.supabase.co/functions/v1/subscribe"     # 구독 폼 또는 subscribe 함수 URL
 SUB_BASE = "https://corocmnneqzimohtrhuf.supabase.co/functions/v1/subscribe"
 
 
