@@ -35,3 +35,4 @@ jobs:
         EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: python daily_trend_report.py
+ 
